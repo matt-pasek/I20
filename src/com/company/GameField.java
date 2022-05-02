@@ -24,7 +24,8 @@ public class GameField extends JPanel {
 
         for (CharacterClass player : players) {
             g.drawImage(player.getImage(), player.getX(), player.getY(), this);
-            g.drawString("healthPoints: " + player.getHealthPoints(), player.getX(), player.getY());
+            g.drawString("" + player.getHealthPoints(), player.getX(), player.getY() + 12);
+            g.drawString("∞", player.getX(), player.getY() + 26);
         }
     }
 
@@ -34,20 +35,26 @@ public class GameField extends JPanel {
             super.keyPressed(e);
             int key = e.getKeyCode();
             for (CharacterClass player : players) {
-                if (key == KeyEvent.VK_LEFT) {
-                    player.setX(player.getX() - 40);
+                if (key == player.leftKey) {
+                    player.left();
                 }
-                if (key == KeyEvent.VK_RIGHT) {
-                    player.setX(player.getX() + 40);
+                if (key == player.rightKey) {
+                    player.right();
                 }
-                if (key == KeyEvent.VK_UP) {
-                    player.setY(player.getY() - 40);
+                if (key == player.upKey) {
+                    player.up();
                 }
-                if (key == KeyEvent.VK_DOWN) {
-                    player.setY(player.getY() + 40);
+                if (key == player.downKey) {
+                    player.down();
                 }
-                if (key == KeyEvent.VK_O) {
+                if (key == player.leftAttackKey) {
                     player.setAttackLeftImage();
+                    if (player.getX() >= Constants.CHARACTER_IMG_WIDTH) {
+                        int neighbourId = CharacterClass.occupiedCells[player.getX() - Constants.CHARACTER_IMG_WIDTH][player.getY()];
+                        if (neighbourId > 0){
+                            player.attack(players[neighbourId - 1]);
+                        }
+                    }
 
                     //timer
                     new java.util.Timer().schedule(
@@ -60,9 +67,14 @@ public class GameField extends JPanel {
                             }, 200
                     );
                 }
-                if (key == KeyEvent.VK_P) {
+                if (key == player.rightAttackKey) {
                     player.setAttackRightImage();
-
+                    if (player.getX() <Constants.MAX_RIGHT_POSITION) {
+                        int neighbourId = CharacterClass.occupiedCells[player.getX() + Constants.CHARACTER_IMG_WIDTH][player.getY()];
+                        if (neighbourId > 0){
+                            player.attack(players[neighbourId - 1]);
+                        }
+                    }
                     //timer
                     new java.util.Timer().schedule(
                             new java.util.TimerTask() {

@@ -1,20 +1,27 @@
 package com.company.classes;
 
+import com.company.Constants;
+
 import javax.swing.*;
 import java.awt.*;
 
 public abstract class CharacterClass implements BaseClass {
+    public static int[][] occupiedCells = new int[Constants.WINDOW_WIDTH][Constants.WINDOW_HEIGHT];
+    private static int playerCount = 0;
     private int healthPoints = 200;
     private int manaPoints;
     private int level;
     private AttackType attackType;
     private int attackAmount;
-    private String name;
+    private int id;
+    protected String name, playerClass;
     private int maxHealthPoints;
     private int maxManaPoints;
-    private int leftKey, rightKey, upKey, downKey, leftAttackKey, rightAttackKey;
+    public int leftKey, rightKey, upKey, downKey, leftAttackKey, rightAttackKey;
 
     public CharacterClass(String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey, int leftAttackKey, int rightAttackKey) {
+        this.id = ++playerCount;
+        occupiedCells[x][y] = this.id;
         this.name = name;
         this.x = x;
         this.y = y;
@@ -24,6 +31,7 @@ public abstract class CharacterClass implements BaseClass {
         this.leftAttackKey = leftAttackKey;
         this.rightAttackKey = rightAttackKey;
         this.rightKey = rightKey;
+        this.setLevel(1);
     }
 
     public void setHealthPoints(int healthPoints) {
@@ -108,8 +116,9 @@ public abstract class CharacterClass implements BaseClass {
         return maxManaPoints;
     }
 
-    @Override
-    public void attack() {
+
+    public void attack(CharacterClass attackedPlayer) {
+        attackedPlayer.reduceHealth(this.attackAmount);
     }
 
     @Override
@@ -169,7 +178,10 @@ public abstract class CharacterClass implements BaseClass {
         return y;
     }
 
-    public void uploadImage(String baseImage, String attackLeftImage, String attackRightImage) {
+    public void uploadImage() {
+        String baseImage = Constants.IMG_FOLDER + this.playerClass + "/base.png";
+        String attackLeftImage = Constants.IMG_FOLDER + this.playerClass + "/left.png";
+        String attackRightImage = Constants.IMG_FOLDER + this.playerClass + "/right.png";
         this.baseImage = new ImageIcon(baseImage).getImage();
         this.attackLeftImage = new ImageIcon(attackLeftImage).getImage();
         this.attackRightImage = new ImageIcon(attackRightImage).getImage();
@@ -186,5 +198,32 @@ public abstract class CharacterClass implements BaseClass {
 
     public void setAttackRightImage() {
         this.image = this.attackRightImage;
+    }
+
+    public abstract void left();
+
+    public abstract void right();
+
+    public abstract void up();
+
+    public abstract void down();
+
+    public abstract void leftAttack();
+
+    public abstract void rightAttack();
+
+    public void tryChangePosition(int newX, int newY) {
+        if (occupiedCells[newX][newY] == 0) {
+            occupiedCells[this.x][this.y] = 0;
+            this.x = newX;
+            this.y = newY;
+            occupiedCells[this.x][this.y] = this.id;
+        } else {
+            reduceHealth(50);
+        }
+    }
+
+    private void reduceHealth(int amount) {
+        setHealthPoints(this.healthPoints - amount);
     }
 }
