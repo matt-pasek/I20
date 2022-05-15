@@ -4,9 +4,8 @@ import com.company.Constants;
 import com.company.classes.AttackType;
 import com.company.classes.CharacterClass;
 
-public class Archer extends CharacterClass {
-    public Archer(String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey, int leftAttackKey,
-            int rightAttackKey) {
+public class Archer  extends CharacterClass {
+    public Archer(String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey, int leftAttackKey, int rightAttackKey) {
         super(name, x, y, leftKey, rightKey, upKey, downKey, leftAttackKey, rightAttackKey);
 
         this.setAttackType(AttackType.PHYSICAL_RANGED);
@@ -16,11 +15,9 @@ public class Archer extends CharacterClass {
         this.uploadImage();
         this.setAttackAmount(70);
     }
-
     @Override
     public void left() {
-        int newPositionX = this.getX() >= Constants.CHARACTER_IMG_WIDTH ? this.getX() - Constants.CHARACTER_IMG_WIDTH
-                : Constants.MAX_RIGHT_POSITION;
+        int newPositionX = this.getX() >= Constants.CHARACTER_IMG_WIDTH ? this.getX() - Constants.CHARACTER_IMG_WIDTH : Constants.MAX_RIGHT_POSITION;
         tryChangePosition(newPositionX, getY());
 
     }
@@ -33,22 +30,18 @@ public class Archer extends CharacterClass {
 
     @Override
     public void up() {
-        int newPositionY = this.getY() < Constants.CHARACTER_IMG_HEIGHT ? Constants.MAX_RIGHT_POSITION
-                : this.getY() - Constants.CHARACTER_IMG_HEIGHT;
+        int newPositionY = this.getY() < Constants.CHARACTER_IMG_HEIGHT ? Constants.MAX_RIGHT_POSITION : this.getY() - Constants.CHARACTER_IMG_HEIGHT;
         tryChangePosition(getX(), newPositionY);
     }
 
     @Override
     public void down() {
-        int newPositionY = this.getY() < Constants.MAX_RIGHT_POSITION ? this.getY() + Constants.CHARACTER_IMG_HEIGHT
-                : 0;
+        int newPositionY = this.getY() < Constants.MAX_RIGHT_POSITION ? this.getY() + Constants.CHARACTER_IMG_HEIGHT : 0;
         tryChangePosition(getX(), newPositionY);
     }
-
     public void leftAttack() {
 
     }
-
     public void rightAttack() {
 
     }

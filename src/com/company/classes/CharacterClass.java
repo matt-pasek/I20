@@ -4,7 +4,6 @@ import com.company.Constants;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Random;
 
 public abstract class CharacterClass implements BaseClass {
     public static int[][] occupiedCells = new int[Constants.WINDOW_WIDTH][Constants.WINDOW_HEIGHT];
@@ -20,8 +19,7 @@ public abstract class CharacterClass implements BaseClass {
     private int maxManaPoints;
     public int leftKey, rightKey, upKey, downKey, leftAttackKey, rightAttackKey;
 
-    public CharacterClass(String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey,
-            int leftAttackKey, int rightAttackKey) {
+    public CharacterClass(String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey, int leftAttackKey, int rightAttackKey) {
         this.id = ++playerCount;
         occupiedCells[x][y] = this.id;
         this.name = name;
@@ -41,7 +39,8 @@ public abstract class CharacterClass implements BaseClass {
             this.healthPoints = 0;
         } else if (healthPoints > this.maxHealthPoints) {
             this.healthPoints = this.maxHealthPoints;
-        } else {
+        }
+        else {
             this.healthPoints = healthPoints;
         }
     }
@@ -51,7 +50,8 @@ public abstract class CharacterClass implements BaseClass {
             this.manaPoints = 0;
         } else if (manaPoints > this.maxManaPoints) {
             this.manaPoints = this.maxManaPoints;
-        } else {
+        }
+        else {
             this.manaPoints = manaPoints;
         }
     }
@@ -116,35 +116,14 @@ public abstract class CharacterClass implements BaseClass {
         return maxManaPoints;
     }
 
+
     public void attack(CharacterClass attackedPlayer) {
         attackedPlayer.reduceHealth(this.attackAmount);
-        if (this.playerClass == "healer") {
-            restoreHealth(10);
-        }
-        System.out.println(this.playerClass + "  attacked " + attackedPlayer.playerClass + " for " + this.attackAmount);
-        if (attackedPlayer.getHealthPoints() == 0) {
-            System.out.println(attackedPlayer.playerClass + " died");
-            attackedPlayer.setImage(null);
-            occupiedCells[attackedPlayer.getX()][attackedPlayer.getY()] = 0;
-            attackedPlayer.setAttackAmount(0);
-            attackedPlayer.setMaxHealthPoints(0);
-            playerCount--;
-        }
-        if (playerCount == 1) {
-            System.out.println("Player " + this.name + " Won!");
-            new java.util.Timer().schedule(
-                    new java.util.TimerTask() {
-                        @Override
-                        public void run() {
-                            Runtime.getRuntime().exit(0);
-                        }
-                    }, 1000);
-        }
     }
 
     @Override
     public void restoreHealth(int amount) {
-        setHealthPoints(this.getHealthPoints() + amount);
+        setHealthPoints(this.getMaxHealthPoints() + amount);
     }
 
     @Override
@@ -169,8 +148,7 @@ public abstract class CharacterClass implements BaseClass {
 
     @Override
     public void info() {
-        System.out.println("Name: " + this.name + "\nCurrentHP: " + this.healthPoints + "\nCurrentmana: "
-                + this.maxManaPoints + "\nLevel: " + this.level);
+        System.out.println("Name: " + this.name + "\nCurrentHP: " + this.healthPoints + "\nCurrentmana: " + this.maxManaPoints + "\nLevel: " + this.level);
     }
 
     private Image image, baseImage, attackLeftImage, attackRightImage;
@@ -246,30 +224,6 @@ public abstract class CharacterClass implements BaseClass {
     }
 
     private void reduceHealth(int amount) {
-
         setHealthPoints(this.healthPoints - amount);
-        /*
-         * if (this.getHealthPoints() == 0) {
-         * System.out.println(this.name + " zginales");
-         * this.setImage(null);
-         * occupiedCells[this.getX()][this.getY()] = 0;
-         * this.setAttackAmount(0);
-         * this.setMaxHealthPoints(0);
-         * playerCount--;
-         * }
-         * if (playerCount == 1) {
-         * System.out.println("Koniec gry!");
-         * new java.util.Timer().schedule(
-         * new java.util.TimerTask() {
-         * 
-         * @Override
-         * public void run() {
-         * Runtime.getRuntime().exit(0);
-         * }
-         * }, 1000
-         * );
-         * }
-         */
     }
-
 }
