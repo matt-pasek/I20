@@ -1,48 +1,55 @@
 package com.company.classes;
 
-import com.company.Constants;
-
 import javax.swing.*;
 import java.awt.*;
 
 public abstract class CharacterClass implements BaseClass {
-    public static int[][] occupiedCells = new int[Constants.WINDOW_WIDTH][Constants.WINDOW_HEIGHT];
-    private static int playerCount = 0;
+    public boolean onCooldown = false;
+    public static int[][] occupiedCells = new int[321][321];
+    public static int playerCount = 0;
+    private int number;
     private int healthPoints = 200;
     private int manaPoints;
     private int level;
     private AttackType attackType;
     private int attackAmount;
-    private int id;
-    protected String name, playerClass;
+    private String name;
     private int maxHealthPoints;
     private int maxManaPoints;
-    public int leftKey, rightKey, upKey, downKey, leftAttackKey, rightAttackKey;
+    private int leftKey, rightKey, upKey, downKey, leftAttackKey, rightAttackKey, abilityKey;
+    protected String className;
+    private int minRange, maxRange;
 
-    public CharacterClass(String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey, int leftAttackKey, int rightAttackKey) {
-        this.id = ++playerCount;
-        occupiedCells[x][y] = this.id;
+    public CharacterClass(
+            String name, int x, int y, int leftKey, int rightKey, int upKey, int downKey, int leftAttackKey,
+            int rightAttackKey, int minRange, int maxRange, int abilityKey) {
+        this.number = ++playerCount;
+        occupiedCells[x][y] = this.number;
         this.name = name;
         this.x = x;
         this.y = y;
         this.leftKey = leftKey;
+        this.rightKey = rightKey;
         this.upKey = upKey;
         this.downKey = downKey;
         this.leftAttackKey = leftAttackKey;
         this.rightAttackKey = rightAttackKey;
-        this.rightKey = rightKey;
-        this.setLevel(1);
+        this.minRange = minRange;
+        this.maxRange = maxRange;
+        this.abilityKey = abilityKey;
     }
 
     public void setHealthPoints(int healthPoints) {
-        if (healthPoints < 0) {
+        System.out.println("SET HP1 " + healthPoints);
+        if (healthPoints <= 0) {
             this.healthPoints = 0;
+            this.dead();
         } else if (healthPoints > this.maxHealthPoints) {
             this.healthPoints = this.maxHealthPoints;
-        }
-        else {
+        } else {
             this.healthPoints = healthPoints;
         }
+        System.out.println("SET HP2 " + this.healthPoints);
     }
 
     public void setManaPoints(int manaPoints) {
@@ -50,8 +57,7 @@ public abstract class CharacterClass implements BaseClass {
             this.manaPoints = 0;
         } else if (manaPoints > this.maxManaPoints) {
             this.manaPoints = this.maxManaPoints;
-        }
-        else {
+        } else {
             this.manaPoints = manaPoints;
         }
     }
@@ -116,14 +122,14 @@ public abstract class CharacterClass implements BaseClass {
         return maxManaPoints;
     }
 
-
     public void attack(CharacterClass attackedPlayer) {
         attackedPlayer.reduceHealth(this.attackAmount);
+        System.out.println(this.className + " attacked " + attackedPlayer.className + " for " + this.attackAmount);
     }
 
     @Override
     public void restoreHealth(int amount) {
-        setHealthPoints(this.getMaxHealthPoints() + amount);
+        setHealthPoints(this.getHealthPoints() + amount);
     }
 
     @Override
@@ -148,7 +154,8 @@ public abstract class CharacterClass implements BaseClass {
 
     @Override
     public void info() {
-        System.out.println("Name: " + this.name + "\nCurrentHP: " + this.healthPoints + "\nCurrentmana: " + this.maxManaPoints + "\nLevel: " + this.level);
+        System.out.println("Name: " + this.name + "\nCurrentHP: " + this.healthPoints + "\nCurrentmana: "
+                + this.maxManaPoints + "\nLevel: " + this.level);
     }
 
     private Image image, baseImage, attackLeftImage, attackRightImage;
@@ -178,10 +185,10 @@ public abstract class CharacterClass implements BaseClass {
         return y;
     }
 
-    public void uploadImage() {
-        String baseImage = Constants.IMG_FOLDER + this.playerClass + "/base.png";
-        String attackLeftImage = Constants.IMG_FOLDER + this.playerClass + "/left.png";
-        String attackRightImage = Constants.IMG_FOLDER + this.playerClass + "/right.png";
+    public void uploadImage(String baseImage, String attackLeftImage, String attackRightImage) {
+        baseImage = "images\\" + baseImage;
+        attackLeftImage = "images\\" + attackLeftImage;
+        attackRightImage = "images\\" + attackRightImage;
         this.baseImage = new ImageIcon(baseImage).getImage();
         this.attackLeftImage = new ImageIcon(attackLeftImage).getImage();
         this.attackRightImage = new ImageIcon(attackRightImage).getImage();
@@ -200,6 +207,45 @@ public abstract class CharacterClass implements BaseClass {
         this.image = this.attackRightImage;
     }
 
+    public int getLeftKey() {
+        return leftKey;
+    }
+
+    public int getRightKey() {
+        return rightKey;
+    }
+
+    public int getUpKey() {
+        return upKey;
+    }
+
+    public int getDownKey() {
+        return downKey;
+    }
+
+    public int getLeftAttackKey() {
+        return leftAttackKey;
+    }
+
+    public int getRightAttackKey() {
+        return rightAttackKey;
+    }
+
+    public void tryChangePosition(int newPositionX, int newPositionY) {
+        if (occupiedCells[newPositionX][newPositionY] == 0) {
+            occupiedCells[this.x][this.y] = 0;
+            occupiedCells[newPositionX][newPositionY] = this.number;
+            this.x = newPositionX;
+            this.y = newPositionY;
+        } else {
+            reduceHealth(50);
+        }
+    }
+
+    protected void reduceHealth(int amount) {
+        setHealthPoints(this.getHealthPoints() - amount);
+    }
+
     public abstract void left();
 
     public abstract void right();
@@ -208,22 +254,36 @@ public abstract class CharacterClass implements BaseClass {
 
     public abstract void down();
 
-    public abstract void leftAttack();
-
-    public abstract void rightAttack();
-
-    public void tryChangePosition(int newX, int newY) {
-        if (occupiedCells[newX][newY] == 0) {
-            occupiedCells[this.x][this.y] = 0;
-            this.x = newX;
-            this.y = newY;
-            occupiedCells[this.x][this.y] = this.id;
-        } else {
-            reduceHealth(50);
-        }
+    public int getMaxRange() {
+        return maxRange;
     }
 
-    private void reduceHealth(int amount) {
-        setHealthPoints(this.healthPoints - amount);
+    public int getMinRange() {
+        return minRange;
     }
+
+    public void ability() {
+    }
+
+    public int getAbilityKey() {
+        return abilityKey;
+    }
+
+    public void dead() {
+        this.healthPoints = this.maxHealthPoints;
+        int x, y;
+        boolean again = true;
+        do {
+            x = ((int) (Math.random() * (9))) * 40;
+            y = ((int) (Math.random() * (5))) * 80;
+            if (occupiedCells[x][y] == 0) {
+                occupiedCells[this.x][this.y] = 0;
+                again = false;
+                this.x = x;
+                this.y = y;
+                occupiedCells[this.x][this.y] = this.number;
+            }
+        } while (again);
+    }
+
 }
